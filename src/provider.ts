@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+const iamFastLib = require('iamfast');
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
@@ -24,8 +26,12 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
 		const target = decodeLocation(uri).fsPath;
-		
-        return `{"fspath": "${target.toString()}"}`;
+
+		const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
+
+		let iamfast = new iamFastLib();
+
+		return iamfast.generateIAMPolicy(code);
 	}
 }
 

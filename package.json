@@ -3,6 +3,15 @@
   "displayName": "iamfast",
   "description": "",
   "version": "0.0.1",
+  "author": {
+    "name": "Ian Mckay",
+    "email": "cfn-rps-ext@ian.mn"
+  },
+  "publisher": "iann0036",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iann0036/iamfast-vscode.git"
+  },
   "engines": {
     "vscode": "^1.53.0"
   },
@@ -40,8 +49,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
-    "postinstall": "mkdir iamfast; cd iamfast; git init; git remote add -f origin https://github.com/iann0036/iamfast.git; git config core.sparseCheckout true; echo \"js\" >> .git/info/sparse-checkout; git pull --depth=1 origin main; cd ..; npm i ./iamfast/js/"
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
@@ -57,6 +65,9 @@
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
-    "iamfast": "file:iamfast/js"
+    "acorn": "^7.4.1",
+    "acorn-walk": "^8.0.2",
+    "commander": "^7.0.0",
+    "iamfast": "github:iann0036/iamfast-js"
   }
 }

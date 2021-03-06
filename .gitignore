@@ -105,5 +105,5 @@ dist
 
 # Custom
 out/
-iamfast/
 .DS_Store
+*.vsix

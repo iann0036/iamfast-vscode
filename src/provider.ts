@@ -31,7 +31,11 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 		let iamfast = new iamFastLib();
 
-		return iamfast.generateIAMPolicy(code);
+		try {
+			return iamfast.generateIAMPolicy(code);
+		} catch(e) {}
+
+		return "Could not generate the IAM policy";
 	}
 }
 

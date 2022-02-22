@@ -66,9 +66,6 @@
     "vscode-test": "^1.5.0"
   },
   "dependencies": {
-    "acorn": "^7.4.1",
-    "acorn-walk": "^8.0.2",
-    "commander": "^7.0.0",
-    "iamfast": "github:iann0036/iamfast-js"
+    "iamfast": "github:iann0036/iamfast"
   }
 }

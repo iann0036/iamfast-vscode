@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-const iamFastLib = require('iamfast');
+// @ts-ignore
+import { IAMFast } from 'iamfast';
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
 	static scheme = 'iamfast';
+
 
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 	private _subscriptions: vscode.Disposable;
@@ -27,13 +29,26 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
 		const target = decodeLocation(uri).fsPath;
 
+		let language = 'unknown';
+		if (target.endsWith(".js") || target.endsWith(".cjs")) {
+			language = 'js';
+		} else if (target.endsWith(".py")) {
+			language = 'python';
+		} else if (target.endsWith(".java")) {
+			language = 'java';
+		} else if (target.endsWith(".go")) {
+			language = 'go';
+		} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
+			language = 'cplusplus';
+		}
+
 		const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
-		let iamfast = new iamFastLib();
+		const iamfastobj = new IAMFast();
 
 		try {
-			return iamfast.generateIAMPolicy(code);
-		} catch(e) {}
+			return iamfastobj.GenerateIAMPolicy(code, language);
+		} catch (e) {}
 
 		return "Could not generate the IAM policy";
 	}

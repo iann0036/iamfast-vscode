@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-// @ts-ignore
-import { IAMFast } from 'iamfast';
+import * as iamfast from 'iamfast';
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
@@ -29,7 +28,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
 		const target = decodeLocation(uri).fsPath;
 
-		let language = 'unknown';
+		let language = 'unknown'; // TODO: Replace with static method
 		if (target.endsWith(".js") || target.endsWith(".cjs")) {
 			language = 'js';
 		} else if (target.endsWith(".py")) {
@@ -44,7 +43,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 		const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
-		const iamfastobj = new IAMFast();
+		const iamfastobj = new iamfast.default();
 
 		try {
 			return iamfastobj.GenerateIAMPolicy(code, language);

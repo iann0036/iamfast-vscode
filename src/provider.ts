@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as iamfast from 'iamfast';
+// @ts-ignore
+import { IAMFast } from 'iamfast';
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
@@ -43,7 +44,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 		const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
-		const iamfastobj = new iamfast.default();
+		const iamfastobj = new IAMFast.default();
 
 		try {
 			return iamfastobj.GenerateIAMPolicy(code, language);

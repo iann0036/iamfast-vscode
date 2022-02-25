@@ -39,7 +39,7 @@
         {
           "command": "iamfast.showIAMPolicy",
           "group": "navigation",
-          "when": "resourceLangId == javascript || resourceLangId == javascriptreact || resourceLangId == jsx"
+          "when": "resourceLangId == javascript || resourceLangId == javascriptreact || resourceLangId == jsx || resourceLangId == c || resourceLangId == cpp || resourceLangId == go || resourceLangId == java || resourceLangId == python"
         }
       ]
     }

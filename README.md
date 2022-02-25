@@ -12,5 +12,8 @@
 
 ```
 npm i -U iamfast
-mv node_modules/iamfast/package-module.json node_modules/iamfast/package.json
+cd node_modules/iamfast/
+mv package-module.json package.json
+npm i esbuild
+npm run-script prepare
 ```

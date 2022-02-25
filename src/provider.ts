@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+// @ts-ignore
 import { IAMFast } from 'iamfast';
+import IAMFastReferenceProvider from './referenceprovider';
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
@@ -9,11 +11,15 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 	private _subscriptions: vscode.Disposable;
+	private iamfast: any;
+	private referenceProvider: IAMFastReferenceProvider;
 
-	constructor() {
+	constructor(referenceProvider: IAMFastReferenceProvider) {
 		this._subscriptions = vscode.workspace.onDidCloseTextDocument(doc => {
             console.log(doc.uri.toString());
         });
+		this.iamfast = new IAMFast.default();
+		this.referenceProvider = referenceProvider;
 	}
 
 	dispose() {
@@ -26,39 +32,49 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 	}
 
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
-		const target = decodeLocation(uri).fsPath;
+		return vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Generating IAM policy",
+            cancellable: false
+        }, async (progress, token) => {
+			const targetUri = decodeLocation(uri);
+            const target = targetUri.fsPath;
 
-		let language = 'unknown'; // TODO: Replace with static method
-		if (target.endsWith(".js") || target.endsWith(".cjs")) {
-			language = 'js';
-		} else if (target.endsWith(".py")) {
-			language = 'python';
-		} else if (target.endsWith(".java")) {
-			language = 'java';
-		} else if (target.endsWith(".go")) {
-			language = 'go';
-		} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
-			language = 'cplusplus';
-		}
+			let language = 'unknown'; // TODO: Replace with static method
+			if (target.endsWith(".js") || target.endsWith(".cjs")) {
+				language = 'js';
+			} else if (target.endsWith(".py")) {
+				language = 'python';
+			} else if (target.endsWith(".java")) {
+				language = 'java';
+			} else if (target.endsWith(".go")) {
+				language = 'go';
+			} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
+				language = 'cplusplus';
+			}
 
-		const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
+			const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
-		const iamfastobj = new IAMFast.default();
+			try {
+				let output = this.iamfast.GenerateIAMPolicy(code, language);
 
-		try {
-			return iamfastobj.GenerateIAMPolicy(code, language);
-		} catch (e) {}
+				this.referenceProvider.set(targetUri, this.iamfast.last_privs);
 
-		return "Could not generate the IAM policy";
+				return output;
+			} catch (e) {}
+
+			return "Could not generate the IAM policy";
+        });
 	}
 }
 
 export function encodeLocation(uri: vscode.Uri): vscode.Uri {
 	const fromdoc = encodeURIComponent(uri.toString());
-	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}`);
+	const randomstr = (Math.random() + 1).toString(36).substring(2);
+	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}#${randomstr}`);
 }
 
 export function decodeLocation(uri: vscode.Uri): vscode.Uri {
-	const fromdoc = decodeURIComponent(uri.query);
+	const fromdoc = decodeURIComponent(uri.query.split("#")[0]);
 	return vscode.Uri.parse(fromdoc);
 }

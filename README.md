@@ -7,3 +7,10 @@
 > IAM policy generation from application code
 
 ![Screenshot](assets/screenshot.png)
+
+## Updating
+
+```
+npm i -U iamfast
+mv node_modules/iamfast/package-module.json node_modules/iamfast/package.json
+```

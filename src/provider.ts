@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-// @ts-ignore
 import { IAMFast } from 'iamfast';
 
 export default class Provider implements vscode.TextDocumentContentProvider {

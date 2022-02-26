@@ -1,17 +1,26 @@
 {
   "name": "iamfast-vscode",
-  "displayName": "iamfast",
+  "displayName": "IAMFast",
   "description": "AWS IAM policy generation from application code",
   "version": "0.0.2",
   "author": {
     "name": "Ian Mckay",
     "email": "iamfast@ian.mn"
   },
+	"keywords": [
+		"AWS",
+		"AST",
+    "IAM"
+	],
   "publisher": "iann0036",
+  "icon": "assets/logo_128.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/iann0036/iamfast-vscode.git"
   },
+	"bugs": {
+		"url": "https://github.com/iann0036/iamfast-vscode/issues"
+	},
   "engines": {
     "vscode": "^1.53.0"
   },
@@ -23,6 +32,10 @@
   ],
   "main": "./out/extension.js",
   "preview": true,
+	"galleryBanner": {
+		"color": "#353535",
+		"theme": "dark"
+	},
   "contributes": {
     "commands": [
       {

@@ -4,4 +4,4 @@
 
 > IAM policy generation from application code
 
-![Screenshot](assets/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/iann0036/iamfast-vscode/main/assets/screenshot.png)

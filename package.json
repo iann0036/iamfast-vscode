@@ -59,7 +59,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "cp -f ./node_modules/iamfast/package-module.json ./node_modules/iamfast/package.json && tsc -p ./",
+    "compile": "cp -f ./node_modules/iamfast/package-module.json ./node_modules/iamfast/package.json || true && tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",

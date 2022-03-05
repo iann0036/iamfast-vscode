@@ -7,20 +7,20 @@
     "name": "Ian Mckay",
     "email": "iamfast@ian.mn"
   },
-	"keywords": [
-		"AWS",
-		"AST",
+  "keywords": [
+    "AWS",
+    "AST",
     "IAM"
-	],
+  ],
   "publisher": "iann0036",
   "icon": "assets/logo_128.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/iann0036/iamfast-vscode.git"
   },
-	"bugs": {
-		"url": "https://github.com/iann0036/iamfast-vscode/issues"
-	},
+  "bugs": {
+    "url": "https://github.com/iann0036/iamfast-vscode/issues"
+  },
   "engines": {
     "vscode": "^1.53.0"
   },
@@ -28,19 +28,28 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:iamfast.showIAMPolicy"
+    "onCommand:iamfast.generateFileIAMPolicy",
+    "onCommand:iamfast.generateWorkspaceIAMPolicy"
   ],
   "main": "./out/extension.js",
   "preview": true,
-	"galleryBanner": {
-		"color": "#353535",
-		"theme": "dark"
-	},
+  "galleryBanner": {
+    "color": "#353535",
+    "theme": "dark"
+  },
   "contributes": {
     "commands": [
       {
-        "command": "iamfast.showIAMPolicy",
-        "title": "Show IAM Policy",
+        "command": "iamfast.generateFileIAMPolicy",
+        "title": "Generate IAM Policy for this file",
+        "icon": {
+          "light": "icon-light.png",
+          "dark": "icon-dark.png"
+        }
+      },
+      {
+        "command": "iamfast.generateWorkspaceIAMPolicy",
+        "title": "Generate IAM Policy for this workspace",
         "icon": {
           "light": "icon-light.png",
           "dark": "icon-dark.png"
@@ -48,11 +57,15 @@
       }
     ],
     "menus": {
-      "editor/title": [
+      "editor/title/run": [
         {
-          "command": "iamfast.showIAMPolicy",
+          "command": "iamfast.generateFileIAMPolicy",
           "group": "navigation",
           "when": "resourceLangId == javascript || resourceLangId == javascriptreact || resourceLangId == jsx || resourceLangId == c || resourceLangId == cpp || resourceLangId == go || resourceLangId == java || resourceLangId == python"
+        },
+        {
+          "command": "iamfast.generateWorkspaceIAMPolicy",
+          "group": "navigation"
         }
       ]
     }

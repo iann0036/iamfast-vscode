@@ -13,18 +13,31 @@ export function activate(context: ExtensionContext) {
 		], referenceProvider)
 	);
 	
-	const commandRegistration = commands.registerTextEditorCommand('iamfast.showIAMPolicy', async editor => {
+	const fileCommandRegistration = commands.registerTextEditorCommand('iamfast.generateFileIAMPolicy', async editor => {
 		referenceProvider.setDoc(editor.document);
-		const uri = encodeLocation(editor.document.uri);
+		const uri = encodeLocation(editor.document.uri, 'file');
 		const doc = await workspace.openTextDocument(uri);
 		languages.setTextDocumentLanguage(doc, 'json');
 		
 		return await window.showTextDocument(doc, ViewColumn.Beside, true);
 	});
+	
+	const workspaceCommandRegistration = commands.registerTextEditorCommand('iamfast.generateWorkspaceIAMPolicy', async editor => {
+		const workspaceFolder = workspace.getWorkspaceFolder(editor.document.uri);
+		if (workspaceFolder !== undefined) {
+			referenceProvider.setWorkspaceFolder(workspaceFolder!);
+			const uri = encodeLocation(workspaceFolder.uri, 'workspace');
+			const doc = await workspace.openTextDocument(uri);
+			languages.setTextDocumentLanguage(doc, 'json');
+			
+			return await window.showTextDocument(doc, ViewColumn.Beside, true);
+		}
+	});
 
 	context.subscriptions.push(
 		provider,
-		commandRegistration,
+		fileCommandRegistration,
+		workspaceCommandRegistration,
 		providerRegistrations
 	);
 }

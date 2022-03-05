@@ -10,20 +10,15 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 
 	private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
-	private _subscriptions: vscode.Disposable;
 	private iamfast: any;
 	private referenceProvider: IAMFastReferenceProvider;
 
 	constructor(referenceProvider: IAMFastReferenceProvider) {
-		this._subscriptions = vscode.workspace.onDidCloseTextDocument(doc => {
-            console.log(doc.uri.toString());
-        });
 		this.iamfast = new IAMFast.default();
 		this.referenceProvider = referenceProvider;
 	}
 
 	dispose() {
-		this._subscriptions.dispose();
 		this._onDidChange.dispose();
 	}
 
@@ -37,44 +32,59 @@ export default class Provider implements vscode.TextDocumentContentProvider {
             title: "Generating IAM policy",
             cancellable: false
         }, async (progress, token) => {
-			const targetUri = decodeLocation(uri);
-            const target = targetUri.fsPath;
+			let targetUri = decodeLocation(uri);
+			let targetUriType = decodeLocationType(uri);
+            let target = targetUri.fsPath;
+			let targetUris = [targetUri];
+			let output;
 
-			let language = 'unknown'; // TODO: Replace with static method
-			if (target.endsWith(".js") || target.endsWith(".cjs")) {
-				language = 'js';
-			} else if (target.endsWith(".py")) {
-				language = 'python';
-			} else if (target.endsWith(".java")) {
-				language = 'java';
-			} else if (target.endsWith(".go")) {
-				language = 'go';
-			} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
-				language = 'cplusplus';
+			if (targetUriType === "workspace") {
+				targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,jsx,c,cpp,go,java,py,py3}'));
 			}
 
-			const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
+			for (targetUri of targetUris) {
+				target = targetUri.fsPath;
 
-			try {
-				let output = this.iamfast.GenerateIAMPolicy(code, language);
+				console.info("Processing " + targetUri.fsPath);
 
-				this.referenceProvider.set(targetUri, this.iamfast.last_privs);
+				let language = 'unknown'; // TODO: Replace with static method
+				if (target.endsWith(".js") || target.endsWith(".cjs")) {
+					language = 'js';
+				} else if (target.endsWith(".py")) {
+					language = 'python';
+				} else if (target.endsWith(".java")) {
+					language = 'java';
+				} else if (target.endsWith(".go")) {
+					language = 'go';
+				} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
+					language = 'cplusplus';
+				}
 
-				return output;
-			} catch (e) {}
+				const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
-			return "Could not generate the IAM policy";
+				try {
+					output = this.iamfast.GenerateIAMPolicy(code, language);
+					
+					this.referenceProvider.set(targetUri, this.iamfast.last_privs);
+				} catch (e) {}
+			}
+			
+			return output || "Could not generate the IAM policy";
         });
 	}
 }
 
-export function encodeLocation(uri: vscode.Uri): vscode.Uri {
+export function encodeLocation(uri: vscode.Uri, locationType: string): vscode.Uri {
 	const fromdoc = encodeURIComponent(uri.toString());
 	const randomstr = (Math.random() + 1).toString(36).substring(2);
-	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}#${randomstr}`);
+	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}#${locationType}#${randomstr}`);
 }
 
 export function decodeLocation(uri: vscode.Uri): vscode.Uri {
-	const fromdoc = decodeURIComponent(uri.query.split("#")[0]);
+	const fromdoc = decodeURIComponent(uri.query);
 	return vscode.Uri.parse(fromdoc);
+}
+
+export function decodeLocationType(uri: vscode.Uri): string {
+	return uri.fragment.split("#")[0];
 }

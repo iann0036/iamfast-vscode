@@ -36,7 +36,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 			let targetUriType = decodeLocationType(uri);
             let target = targetUri.fsPath;
 			let targetUris = [targetUri];
-			let output;
+			let output: string = '';
 
 			if (targetUriType === "workspace") {
 				targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,jsx,c,cpp,go,java,py,py3}'));
@@ -65,11 +65,17 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 				try {
 					output = this.iamfast.GenerateIAMPolicy(code, language);
 					
-					this.referenceProvider.set(targetUri, this.iamfast.last_privs);
+					await this.referenceProvider.set(targetUri, this.iamfast.last_privs);
 				} catch (e) {}
 			}
+
+			this.referenceProvider.setPolicyContent(output);
+
+			if (output !== '') {
+				return output;
+			}
 			
-			return output || "Could not generate the IAM policy";
+			return "Could not generate the IAM policy";
         });
 	}
 }

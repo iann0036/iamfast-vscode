@@ -65,7 +65,8 @@
         },
         {
           "command": "iamfast.generateWorkspaceIAMPolicy",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "resourceFilename != IAM Policy"
         }
       ]
     }

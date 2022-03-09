@@ -27,6 +27,8 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 	}
 
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
+		this.iamfast.Clear();
+
 		return vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Generating IAM policy",

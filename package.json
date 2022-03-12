@@ -1,6 +1,6 @@
 {
   "name": "iamfast",
-  "displayName": "IAMFast",
+  "displayName": "iamfast",
   "description": "AWS IAM policy generation from application code",
   "version": "0.0.2",
   "author": {

@@ -28,6 +28,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 	provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
 		this.iamfast.Clear();
+		this.referenceProvider.clear();
 
 		return vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,

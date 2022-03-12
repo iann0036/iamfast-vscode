@@ -37,6 +37,11 @@ export default class IAMFastReferenceProvider implements vscode.ReferenceProvide
 		});
 	}
 
+	clear() {
+		this.uriPrivs = [];
+		this.positionalPrivs = [];
+	}
+
 	setPolicyContent(content: string) {
 		let startPos = content.indexOf("{", 1);
 		let endPos = content.indexOf("}", startPos) + 1;

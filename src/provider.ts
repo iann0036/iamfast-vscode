@@ -37,6 +37,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
         }, async (progress, token) => {
 			let targetUri = decodeLocation(uri);
 			let targetUriType = decodeLocationType(uri);
+			let targetOutputType = decodeOutputType(uri);
             let target = targetUri.fsPath;
 			let targetUris = [targetUri];
 			let output: string = '';
@@ -66,13 +67,21 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 				const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});
 
 				try {
-					output = this.iamfast.GenerateIAMPolicy(code, language);
+					if (targetOutputType === "yaml") {
+						output = this.iamfast.GenerateYAMLPolicy(code, language);
+					} else if (targetOutputType === "sam") {
+						output = this.iamfast.GenerateSAMTemplate(code, language);
+					} else if (targetOutputType === "hcl") {
+						output = this.iamfast.GenerateHCLTemplate(code, language);
+					} else {
+						output = this.iamfast.GenerateIAMPolicy(code, language);
+					}
 					
 					await this.referenceProvider.set(targetUri, this.iamfast.last_privs);
 				} catch (e) {}
 			}
 
-			this.referenceProvider.setPolicyContent(output);
+			this.referenceProvider.setPolicyContent(output, targetOutputType);
 
 			if (output !== '') {
 				return output;
@@ -83,17 +92,21 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 	}
 }
 
-export function encodeLocation(uri: vscode.Uri, locationType: string): vscode.Uri {
+export function encodeLocation(uri: vscode.Uri, locationType: string, outputType: string): vscode.Uri {
 	const fromdoc = encodeURIComponent(uri.toString());
 	const randomstr = (Math.random() + 1).toString(36).substring(2);
-	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}#${locationType}#${randomstr}`);
+	return vscode.Uri.parse(`${Provider.scheme}:IAM Policy?${fromdoc}::${outputType}::${locationType}::${randomstr}`);
 }
 
 export function decodeLocation(uri: vscode.Uri): vscode.Uri {
-	const fromdoc = decodeURIComponent(uri.query);
+	const fromdoc = decodeURIComponent(uri.query).split("::")[0];
 	return vscode.Uri.parse(fromdoc);
 }
 
 export function decodeLocationType(uri: vscode.Uri): string {
-	return uri.fragment.split("#")[0];
+	return decodeURIComponent(uri.query).split("::")[2];
+}
+
+export function decodeOutputType(uri: vscode.Uri): string {
+	return decodeURIComponent(uri.query).split("::")[1];
 }

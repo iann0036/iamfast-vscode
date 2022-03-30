@@ -42,38 +42,132 @@ export default class IAMFastReferenceProvider implements vscode.ReferenceProvide
 		this.positionalPrivs = [];
 	}
 
-	setPolicyContent(content: string) {
-		let startPos = content.indexOf("{", 1);
-		let endPos = content.indexOf("}", startPos) + 1;
+	setPolicyContent(content: string, outputType: string) {
+		if (outputType === "json") {
+			let startPos = content.indexOf("{", 1);
+			let endPos = content.indexOf("}", startPos) + 1;
 
-		while (startPos !== -1 && endPos !== -1) {
-			let action = content.substring(startPos, endPos).match(/\"Action\"\:\ \"([a-zA-Z0-9:]+)\"\,/)![1];
+			while (startPos !== -1 && endPos !== -1) {
+				let action = content.substring(startPos, endPos).match(/\"Action\"\:\ \"([a-zA-Z0-9:]+)\"\,/)![1];
 
-			let locations: vscode.Location[] = [];
+				let locations: vscode.Location[] = [];
 
-			for (let uriPriv of this.uriPrivs) {
-				for (let priv of uriPriv['privs']) {
-					if (priv['action'] === action) {
-						locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+				for (let uriPriv of this.uriPrivs) {
+					for (let priv of uriPriv['privs']) {
+						if (priv['action'] === action) {
+							locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+						}
 					}
 				}
+
+				this.positionalPrivs.push({
+					'start': startPos,
+					'end': endPos,
+					'locations': locations,
+					'action': action
+				});
+
+				startPos = content.indexOf("{", endPos);
+				endPos = content.indexOf("}", startPos) + 1;
 			}
+		} else if (outputType === "yaml") {
+			let startPos = content.indexOf("\n  -");
+			let endPos: number;
 
-			this.positionalPrivs.push({
-				'start': startPos,
-				'end': endPos,
-				'locations': locations,
-				'action': action
-			});
+			while (startPos !== -1) {
+				endPos = content.indexOf("\n  -", startPos + 1);
+				if (endPos === -1) {
+					endPos = content.length;
+				}
 
-			startPos = content.indexOf("{", endPos);
-			endPos = content.indexOf("}", startPos) + 1;
+				let action = content.substring(startPos+1, endPos+1).match(/Action: ([a-zA-Z0-9:]+)/)![1];
+
+				let locations: vscode.Location[] = [];
+
+				for (let uriPriv of this.uriPrivs) {
+					for (let priv of uriPriv['privs']) {
+						if (priv['action'] === action) {
+							locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+						}
+					}
+				}
+
+				this.positionalPrivs.push({
+					'start': startPos,
+					'end': endPos+1,
+					'locations': locations,
+					'action': action
+				});
+
+				startPos = content.indexOf("\n  -", endPos);
+			}
+		} else if (outputType === "sam") {
+			let startPos = content.indexOf("\n            -");
+			let endPos: number;
+
+			while (startPos !== -1) {
+				endPos = content.indexOf("\n            -", startPos + 1);
+				if (endPos === -1) {
+					endPos = content.length;
+				}
+
+				let action = content.substring(startPos+1, endPos+1).match(/Action: ([a-zA-Z0-9:]+)/)![1];
+
+				let locations: vscode.Location[] = [];
+
+				for (let uriPriv of this.uriPrivs) {
+					for (let priv of uriPriv['privs']) {
+						if (priv['action'] === action) {
+							locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+						}
+					}
+				}
+
+				this.positionalPrivs.push({
+					'start': startPos,
+					'end': endPos+1,
+					'locations': locations,
+					'action': action
+				});
+
+				startPos = content.indexOf("\n            -", endPos);
+			}
+		} else if (outputType === "hcl") {
+			let startPos = content.indexOf("  statement {");
+			let endPos: number;
+
+			while (startPos !== -1) {
+				endPos = content.indexOf("}", startPos + 1);
+
+				let action = content.substring(startPos, endPos).match(/      \"([a-zA-Z0-9:]+)\"\,/)![1];
+
+				let locations: vscode.Location[] = [];
+
+				for (let uriPriv of this.uriPrivs) {
+					for (let priv of uriPriv['privs']) {
+						if (priv['action'] === action) {
+							locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+						}
+					}
+				}
+
+				this.positionalPrivs.push({
+					'start': startPos-1,
+					'end': endPos+2,
+					'locations': locations,
+					'action': action
+				});
+
+				startPos = content.indexOf("  statement {", endPos);
+			}
 		}
 	}
 
 	provideReferences(doc: vscode.TextDocument, position: vscode.Position, _context: vscode.ReferenceContext, _token: vscode.CancellationToken) {
 		let locations: vscode.Location[] = [];
 		let offset = doc.offsetAt(position);
+
+		console.log(this.positionalPrivs);
 
 		for (let positionalPriv of this.positionalPrivs) {
 			if (offset > positionalPriv['start'] && offset < positionalPriv['end']) {

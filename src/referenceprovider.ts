@@ -167,8 +167,6 @@ export default class IAMFastReferenceProvider implements vscode.ReferenceProvide
 		let locations: vscode.Location[] = [];
 		let offset = doc.offsetAt(position);
 
-		console.log(this.positionalPrivs);
-
 		for (let positionalPriv of this.positionalPrivs) {
 			if (offset > positionalPriv['start'] && offset < positionalPriv['end']) {
 				locations = locations.concat(positionalPriv['locations']);

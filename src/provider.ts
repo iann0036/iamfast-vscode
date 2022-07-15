@@ -43,7 +43,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 			let output: string = '';
 
 			if (targetUriType === "workspace") {
-				targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,jsx,c,cpp,go,java,py,py3}'));
+				targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,cjs,c,cpp,go,java,py,py3,json}'));
 			}
 
 			for (targetUri of targetUris) {
@@ -54,7 +54,7 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 				let language = 'unknown'; // TODO: Replace with static method
 				if (target.endsWith(".js") || target.endsWith(".cjs")) {
 					language = 'js';
-				} else if (target.endsWith(".py")) {
+				} else if (target.endsWith(".py") || target.endsWith(".py3")) {
 					language = 'python';
 				} else if (target.endsWith(".java")) {
 					language = 'java';
@@ -62,6 +62,8 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 					language = 'go';
 				} else if (target.endsWith(".cpp") || target.endsWith(".c")) {
 					language = 'cplusplus';
+				} else if (target.endsWith(".json")) {
+					language = 'asl';
 				}
 
 				const code = fs.readFileSync(target, {encoding:'utf8', flag:'r'});

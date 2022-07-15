@@ -22,7 +22,7 @@ export function activate(context: ExtensionContext) {
 			{ id: 'workspace', label: 'workspace', description: 'Scans all supported files within the current workspace' }
 		];
 
-		if (['javascript', 'javascriptreact', 'jsx', 'c', 'cpp', 'go', 'java', 'python'].includes(editor.document.languageId)) {
+		if (['javascript', 'javascriptreact', 'jsx', 'c', 'cpp', 'go', 'java', 'python', 'json'].includes(editor.document.languageId)) {
 			scopes.unshift({ id: 'file', label: 'file', description: 'Scans only the currently open file' });
 		}
 

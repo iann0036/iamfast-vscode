@@ -2,7 +2,7 @@
   "name": "iamfast",
   "displayName": "iamfast",
   "description": "AWS IAM policy generation from application code",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": {
     "name": "Ian Mckay",
     "email": "iamfast@ian.mn"

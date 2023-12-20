@@ -52,7 +52,7 @@
         {
           "command": "iamfast.generateIAMPolicy",
           "group": "navigation",
-          "when": "resourceFilename != IAM Policy"
+          "when": "resourceFilename != 'IAM Policy'"
         }
       ]
     }

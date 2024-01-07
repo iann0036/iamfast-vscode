@@ -3,6 +3,7 @@ import * as fs from 'fs';
 // @ts-ignore
 import { IAMFast } from 'iamfast';
 import IAMFastReferenceProvider from './referenceprovider';
+import * as path from 'path';
 
 export default class Provider implements vscode.TextDocumentContentProvider {
 
@@ -43,7 +44,14 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 			let output: string = '';
 
 			if (targetUriType === "workspace") {
-				targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,cjs,c,cpp,go,java,py,py3,json}'));
+				try { // try as a package, otherwise deep walk
+					let packagejsonPath = path.join(target, 'package.json');
+					let packagejson = JSON.parse(fs.readFileSync(packagejsonPath, { encoding: 'utf8', flag: 'r' }));
+					let resolvedImportPath = path.join(target, packagejson.main);
+					targetUris = [vscode.Uri.parse("file://" + resolvedImportPath)];
+				} catch(e) {
+					targetUris = await vscode.workspace.findFiles(new vscode.RelativePattern(target, '**/*.{js,cjs,c,cpp,go,java,py,py3,json}'));
+				}
 			}
 
 			for (targetUri of targetUris) {
@@ -70,17 +78,19 @@ export default class Provider implements vscode.TextDocumentContentProvider {
 
 				try {
 					if (targetOutputType === "yaml") {
-						output = this.iamfast.GenerateYAMLPolicy(code, language);
+						output = this.iamfast.GenerateYAMLPolicy(code, language, target);
 					} else if (targetOutputType === "sam") {
-						output = this.iamfast.GenerateSAMTemplate(code, language);
+						output = this.iamfast.GenerateSAMTemplate(code, language, target);
 					} else if (targetOutputType === "hcl") {
-						output = this.iamfast.GenerateHCLTemplate(code, language);
+						output = this.iamfast.GenerateHCLTemplate(code, language, target);
 					} else {
-						output = this.iamfast.GenerateIAMPolicy(code, language);
+						output = this.iamfast.GenerateIAMPolicy(code, language, target);
 					}
 					
-					await this.referenceProvider.set(targetUri, this.iamfast.last_privs);
-				} catch (e) {}
+					await this.referenceProvider.set(targetUri, this.iamfast.privs);
+				} catch (e) {
+					console.debug(e);
+				}
 			}
 
 			this.referenceProvider.setPolicyContent(output, targetOutputType);

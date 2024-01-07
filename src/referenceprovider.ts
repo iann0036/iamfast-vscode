@@ -42,7 +42,7 @@ export default class IAMFastReferenceProvider implements vscode.ReferenceProvide
 		this.positionalPrivs = [];
 	}
 
-	setPolicyContent(content: string, outputType: string) {
+	async setPolicyContent(content: string, outputType: string) {
 		if (outputType === "json") {
 			let startPos = content.indexOf("{", 1);
 			let endPos = content.indexOf("}", startPos) + 1;
@@ -55,7 +55,10 @@ export default class IAMFastReferenceProvider implements vscode.ReferenceProvide
 				for (let uriPriv of this.uriPrivs) {
 					for (let priv of uriPriv['privs']) {
 						if (priv['action'] === action) {
-							locations.push(new vscode.Location(uriPriv.uri!, new vscode.Range(uriPriv.doc!.positionAt(priv.position.start), uriPriv.doc!.positionAt(priv.position.stop + 1))));
+							let privLocationUri = vscode.Uri.parse("file://" + priv['filepath']);
+							let privLocationDoc = await vscode.workspace.openTextDocument(privLocationUri);
+
+							locations.push(new vscode.Location(privLocationUri, new vscode.Range(privLocationDoc.positionAt(priv.position.start), privLocationDoc.positionAt(priv.position.stop + 1))));
 						}
 					}
 				}

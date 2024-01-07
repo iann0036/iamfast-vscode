@@ -2,7 +2,7 @@
   "name": "iamfast",
   "displayName": "iamfast",
   "description": "AWS IAM policy generation from application code",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": {
     "name": "Ian Mckay",
     "email": "iamfast@ian.mn"
@@ -22,14 +22,12 @@
     "url": "https://github.com/iann0036/iamfast-vscode/issues"
   },
   "engines": {
-    "vscode": "^1.57.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:iamfast.generateIAMPolicy"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "preview": true,
   "galleryBanner": {
@@ -55,6 +53,35 @@
           "when": "resourceFilename != 'IAM Policy'"
         }
       ]
+    },
+    "configuration": {
+      "title": "iamfast",
+      "properties": {
+        "iamfast.defaultScope": {
+          "type": "string",
+          "default": "prompt",
+          "enum": ["prompt", "file", "workspace"],
+          "enumItemLabels": [
+            "Always prompt",
+            "Generate at the file level",
+            "Generate at the workspace level"
+          ],
+          "description": "The default scope of the IAM policy."
+        },
+        "iamfast.defaultLanguage": {
+          "type": "string",
+          "default": "prompt",
+          "enum": ["prompt", "json", "yaml", "sam", "hcl"],
+          "enumItemLabels": [
+            "Always prompt",
+            "JSON",
+            "YAML",
+            "SAM",
+            "Terraform"
+          ],
+          "description": "The default output language of the IAM policy."
+        }
+      }
     }
   },
   "scripts": {
